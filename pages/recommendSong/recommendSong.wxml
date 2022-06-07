@@ -16,7 +16,7 @@
       <text class="changeMore">多选</text>
     </view>
     <scroll-view scroll-y enable-flex class="listSrcoll">
-      <view class="listItem" wx:for="{{recommendList}}" wx:key="id" bindtap="showDetail" data-song="{{item}}">
+      <view class="listItem" wx:for="{{recommendList}}" wx:key="id" bindtap="showDetail" data-song="{{item}}" data-index="{{index}}">
         <image src="{{item.album.picUrl}}" />
         <view class="musicInfo">
           <text class="musicName">{{item.name}}</text>

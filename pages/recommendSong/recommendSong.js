@@ -1,4 +1,5 @@
 // pages/recommendSong/recommendSong.js
+import PubSub from "pubsub-js";
 import request from "../../utils/request";
 Page({
   /**
@@ -8,6 +9,7 @@ Page({
     day: "",
     month: "",
     recommendList: [], //推荐列表数据
+    index: 0, //标识点击音乐的下标
   },
 
   /**
@@ -35,6 +37,34 @@ Page({
     });
     // 获取每日推荐数据
     this.getRecommendList();
+
+    // 订阅来自songDtail页面来的数据
+    PubSub.subscribe("getType", (msg, type) => {
+      let { recommendList, index } = this.data;
+      if (type === "pre") {
+        // 上一首
+        /* 如果当前为第一首，则切换到最后一首 */
+        if (index === 0) {
+          index = recommendList.length;
+        }
+        index -= 1;
+      } else {
+        // 下一首
+        /* t如果当前为最后一首，则跳转到第一首 */
+        if (index === recommendList.length - 1) {
+          index = -1;
+        }
+        index += 1;
+      }
+      // 更新下标
+      this.setData({
+        index,
+      });
+      // 获取切歌后的音乐ID
+      let musicId = recommendList[index].id;
+      // 将音乐id回传给songDetail页面
+      PubSub.publish("getMusicId", musicId);
+    });
   },
 
   // 获取每日推荐列表数据
@@ -48,7 +78,12 @@ Page({
 
   // 跳转到songDtail页面
   showDetail(event) {
-    let song = event.currentTarget.dataset.song;
+    let { song, index } = event.currentTarget.dataset;
+    // 更新点击的音乐下标
+    this.setData({
+      index,
+    });
+    // 跳转到详情页
     wx.navigateTo({
       url: "/pages/songDtail/songDtail?musicId=" + song.id,
     });

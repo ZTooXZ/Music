@@ -1,6 +1,6 @@
 // pages/songDtail/songDtail.js
 import request from "../../utils/request";
-
+import PubSub from "pubsub-js";
 // 获取全局实例
 const appInstance = getApp();
 Page({
@@ -11,6 +11,7 @@ Page({
     isPlay: false, //音乐是否播放
     songInfo: {}, //歌曲详情
     musicId: "", //音乐id
+    musicLink: "", //音乐的链接
   },
 
   /**
@@ -83,18 +84,25 @@ Page({
     /* this.setData({
       isPlay,
     }); */
-    let { musicId } = this.data;
-    this.musicContal(isPlay, musicId);
+    let { musicId, musicLink } = this.data;
+    this.musicContal(isPlay, musicId, musicLink);
   },
 
   // 控制音乐播放、暂停的功能函数
-  async musicContal(isPlay, musicId) {
+  async musicContal(isPlay, musicId, musicLink) {
     // 音乐播放
 
     if (isPlay) {
-      // 获取音乐播放链接
-      let musicLinkData = await request("/song/url", { id: musicId });
-      let musicLink = musicLinkData.data[0].url;
+      //音乐播放
+      if (!musicLink) {
+        // 获取音乐播放链接
+        let musicLinkData = await request("/song/url", { id: musicId });
+        let musicLink = musicLinkData.data[0].url;
+        /* 将 音乐链接存放到data中 */
+        this.setData({
+          musicLink,
+        });
+      }
 
       // 设置音乐链接
       this.backgroundAudioManager.src = musicLink;
@@ -103,6 +111,27 @@ Page({
       //音乐暂停
       this.backgroundAudioManager.pause();
     }
+  },
+
+  // 点击切歌的回调
+  handleSwitch(event) {
+    // 获取切歌的类型
+    let type = event.currentTarget.id;
+    // console.log(type);
+    /* 关闭当前播放的音乐 */
+    this.backgroundAudioManager.stop();
+    // 订阅 传回来的musicID
+    PubSub.subscribe("getMusicId", (msg, musicId) => {
+      // console.log(musicId);
+      /* 获取到对应id的音乐详情 */
+      this.getMusicInfo(musicId);
+      // 自动播放当前音乐
+      this.musicContal(true, musicId);
+      // 取消订阅
+      PubSub.unsubscribe("getMusicId");
+    });
+    // 发布消息给 RecommendSongs 页面
+    PubSub.publish("getType", type);
   },
 
   /**

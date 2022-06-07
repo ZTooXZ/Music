@@ -104,3 +104,39 @@
 .musicControl .big {
   font-size: 80rpx;
 }
+
+/* 进度条控制器 */
+.progressControl {
+  width: 640rpx;
+  height: 80rpx;
+  line-height: 80rpx;
+  display: flex;
+  position: absolute;
+  bottom: 200rpx;
+}
+.barControl {
+  position: relative;
+  width: 500rpx;
+  /* width: 500rpx;
+  height: 4rpx;
+  background-color: rgba(0, 0, 0, 0.4); */
+  margin: auto;
+
+}
+.audio-currentTimde-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100rpx;
+  height: 4rpx;
+  z-index: 1;
+}
+.audio-circle {
+  position: absolute;
+  right: -6rpx;
+  top: -4rpx;
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background-color: #fff;
+}
