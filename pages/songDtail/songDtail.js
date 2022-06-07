@@ -1,6 +1,7 @@
 // pages/songDtail/songDtail.js
 import request from "../../utils/request";
 import PubSub from "pubsub-js";
+import moment from "moment";
 // 获取全局实例
 const appInstance = getApp();
 Page({
@@ -12,6 +13,9 @@ Page({
     songInfo: {}, //歌曲详情
     musicId: "", //音乐id
     musicLink: "", //音乐的链接
+    currentTime: "00:00", //播放进度
+    durationTime: "00:00", //总时长
+    currentWdith: 0, //播放条长度
   },
 
   /**
@@ -22,6 +26,7 @@ Page({
     this.setData({
       musicId,
     });
+    // 获取音乐详情
     this.getMusicInfo(musicId);
 
     /* 如果用户操作系统的控制音乐播放/暂停按钮，页面不知道 ，导致页面显示是否播放的状态和真实的音乐播放状态不一致
@@ -57,6 +62,39 @@ Page({
       // 修改音乐为停止状态
       this.changePlayState(false);
     });
+    // 监听播放进度
+    this.backgroundAudioManager.onTimeUpdate(() => {
+      // 计算当前播放时间
+      let currentTime = moment(this.backgroundAudioManager.currentTime * 1000).format("mm:ss");
+      // 计算播放长度
+
+      let currentWdith =
+        (this.backgroundAudioManager.currentTime / this.backgroundAudioManager.duration) * 450;
+      this.setData({
+        currentTime,
+        currentWdith,
+      });
+    });
+    // 监听播放结束
+    this.backgroundAudioManager.onEnded(() => {
+      // 自动切换到下一首歌
+      // 订阅 传回来的musicID
+      PubSub.subscribe("getMusicId", (msg, musicId) => {
+        // console.log(musicId);
+        /* 获取到对应id的音乐详情 */
+        this.getMusicInfo(musicId);
+        // 自动播放当前音乐
+        this.musicContal(true, musicId);
+        // 取消订阅
+        PubSub.unsubscribe("getMusicId");
+      });
+      PubSub.publish("getType", "next");
+      // 修改进度跳和时间
+      this.setData({
+        currentWdith: 0,
+        currentTime: "00:00",
+      });
+    });
   },
   // 修改播放状态的功能函数
   changePlayState(isPlay) {
@@ -69,8 +107,11 @@ Page({
   // 获取音乐详情
   async getMusicInfo(musicId) {
     let songInfo = await request("/song/detail", { ids: musicId });
+    // 获取音乐总时长
+    let durationTime = moment(songInfo.songs[0].dt).format("mm:ss");
     this.setData({
       songInfo: songInfo.songs[0],
+      durationTime,
     });
     // 动态修改窗口标题
     wx.setNavigationBarTitle({
@@ -90,25 +131,22 @@ Page({
 
   // 控制音乐播放、暂停的功能函数
   async musicContal(isPlay, musicId, musicLink) {
-    // 音乐播放
-
     if (isPlay) {
-      //音乐播放
+      // 音乐播放
       if (!musicLink) {
         // 获取音乐播放链接
         let musicLinkData = await request("/song/url", { id: musicId });
-        let musicLink = musicLinkData.data[0].url;
+        musicLink = musicLinkData.data[0].url;
         /* 将 音乐链接存放到data中 */
         this.setData({
           musicLink,
         });
       }
-
       // 设置音乐链接
       this.backgroundAudioManager.src = musicLink;
       this.backgroundAudioManager.title = this.data.songInfo.name;
     } else {
-      //音乐暂停
+      // 暂停音乐
       this.backgroundAudioManager.pause();
     }
   },

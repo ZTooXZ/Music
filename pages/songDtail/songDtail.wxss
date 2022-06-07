@@ -114,23 +114,27 @@
   position: absolute;
   bottom: 200rpx;
 }
+/* .progressControl text {
+  margin: 0 20rpx;
+} */
 .barControl {
   position: relative;
-  width: 500rpx;
-  /* width: 500rpx;
+  width: 450rpx;
   height: 4rpx;
-  background-color: rgba(0, 0, 0, 0.4); */
+  background: rgba(0, 0, 0, 0.4);
   margin: auto;
 
 }
-.audio-currentTimde-bar {
+/* 播放条 */
+.audio-currentTime-bar {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100rpx;
   height: 4rpx;
   z-index: 1;
+  background-color: red;
 }
+/* 小圆球 */
 .audio-circle {
   position: absolute;
   right: -6rpx;

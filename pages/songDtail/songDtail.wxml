@@ -10,18 +10,18 @@
   </view>
   <!-- 进度跳控制区 -->
   <view class="progressControl">
-    <text>00:00</text>
-    <!-- 默认未播放进度条 
+    <text>{{currentTime}}</text>
+    <!-- 默认未播放进度条 -->
     <view class="barControl">
-       实时进度条 
-      <view class="audio-currentTimde-bar">
+      <!-- 实时进度条 -->
+      <view class="audio-currentTime-bar" style="width:{{currentWdith + 'rpx'}}">
         <view class="audio-circle"></view>
       </view>
-    </view> -->
-    <view class="barControl">
-      <slider left-icon="cancel" right-icon="success_no_circle" block-size="12" backgroundColor="#555" activeColor="#FF0000" />
     </view>
-    <text>03:10</text>
+    <!-- <view class="barControl">
+      <slider left-icon="cancel" right-icon="success_no_circle" block-size="12" backgroundColor="#555" activeColor="#FF0000" />
+    </view> -->
+    <text>{{durationTime}}</text>
   </view>
   <!-- 底部播放控制 -->
   <view class="musicControl">
